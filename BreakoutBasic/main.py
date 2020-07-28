@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from game_globals import WINDOW_SIZE
-from sprites import Paddle, Ball
+from sprites import Paddle, Ball, Brick
 
 
 def main():
@@ -30,7 +30,15 @@ def main():
     ball = Ball()
     ball.position = (WIN_WIDTH / 2, WIN_HEIGHT / 2)
 
-    sprites = [paddle, ball]
+    bricks = []
+    for y in range(0, int((WIN_HEIGHT - 200) / 20)):
+        for x in range(0, int((WIN_WIDTH - 20) / 40)):
+            b = Brick()
+            bx, by = b.size
+            b.position = (x * (bx + 10) + 40, y * (by + 10) + 40)
+            bricks.append(b)
+
+    sprites = [paddle, ball, *bricks]
 
     while True:
 
