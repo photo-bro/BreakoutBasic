@@ -2,8 +2,9 @@ import sys
 
 import pygame
 
+from sprites import Ball, Brick, Paddle
+
 from game_globals import WINDOW_SIZE
-from sprites import Paddle, Ball, Brick
 
 
 def main():
@@ -20,9 +21,9 @@ def main():
     background = background.convert()
     background.fill(black)
 
-    font = pygame.font.Font(None, 24)
-    test_title = font.render('Breakbasic !!', 1, (255, 255, 255))
-    background.blit(test_title, (0, 200))
+    # font = pygame.font.Font(None, 24)
+    # test_title = font.render('Breakbasic !!', 1, (255, 255, 255))
+    # background.blit(test_title, (0, 200))
 
     paddle = Paddle()
     paddle.position = (WIN_WIDTH / 2, WIN_HEIGHT - 30)
@@ -56,8 +57,22 @@ def main():
             s.tick()
 
         # Handle collisions
+        collided_sprites = []
+        for s in sprites:
+            if s in collided_sprites:
+                continue
+            for o in sprites:
+                if s == o:
+                    continue
+                if o in collided_sprites:
+                    continue
+                if s.contains(o):
+                    print(f'Collision! Between: {s} {s.position} and {o} {o.position}.')
+                    s.handle_collision(o)
+                    o.handle_collision(s)
+                    collided_sprites.extend([s, o])
 
-        # Paint
+            # Paint
         screen.blit(background, (0, 0))
         for s in sprites:
             # print(f'Sprite: {s.name} is at {s.position}')

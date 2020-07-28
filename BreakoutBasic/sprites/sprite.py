@@ -29,7 +29,24 @@ class AbstractSprite:
         raise NotImplementedError()
 
     def handle_collision(self, other):
-        raise NotImplementedError()
+        pass
 
     def tick(self):
         pass
+
+    def contains(self, other):
+        assert issubclass(type(other), AbstractSprite)
+        x, y = self.position
+        len_x, len_y = self.size
+        ox, oy = other.position
+        olen_x, olen_y = other.size
+
+        if ox >= x and ox + olen_x <= x + len_x:
+            pass
+        else:
+            return False
+
+        if oy >= y and oy + olen_y <= y + len_y:
+            return True
+
+        return False

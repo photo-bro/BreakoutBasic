@@ -1,8 +1,8 @@
+import sprites
 from game_globals import WINDOW_SIZE
-from sprites import AbstractSprite
 
 
-class Ball(AbstractSprite):
+class Ball(sprites.AbstractSprite):
     _speed = 5
     _dir_x = 1
     _dir_y = 1
@@ -19,6 +19,12 @@ class Ball(AbstractSprite):
 
     def handle_mouse_event(self, event):
         pass
+
+    def handle_collision(self, other):
+        if isinstance(other, sprites.Brick):
+            print(f'Collision with a brick at: ({self.position})')
+        if isinstance(other, sprites.Paddle):
+            print(f'Collision with the paddle at: ({self.position})')
 
     def move(self):
         window_x, window_y = WINDOW_SIZE
@@ -40,7 +46,7 @@ class Ball(AbstractSprite):
             self._dir_x = 1
         if y + vel_y < 0:
             y = 0
-            self._dir_y = 1        
+            self._dir_y = 1
 
         self.position = (x + vel_x, y + vel_y)
 

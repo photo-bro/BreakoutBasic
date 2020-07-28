@@ -1,4 +1,4 @@
-from sprites import AbstractSprite
+from . import AbstractSprite
 
 
 class Brick(AbstractSprite):
