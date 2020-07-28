@@ -1,10 +1,10 @@
 import pygame.constants as KEYS
 
 from game_globals import WINDOW_SIZE
-from sprites import AbstractSprite
+from sprites import DynamicSprite
 
 
-class Paddle(AbstractSprite):
+class Paddle(DynamicSprite):
     _button_pressed = False
     _move_delta = 0
 

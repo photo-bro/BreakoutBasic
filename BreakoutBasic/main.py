@@ -45,7 +45,8 @@ def main():
 
         # Events
         for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+            if e.type == pygame.QUIT or \
+                    (e.type == pygame.KEYDOWN and e.key == pygame.K_q):
                 sys.exit()
 
             # Handle events

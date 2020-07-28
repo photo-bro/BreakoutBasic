@@ -1,7 +1,7 @@
-from . import AbstractSprite
+from sprites import StaticSprite
 
 
-class Brick(AbstractSprite):
+class Brick(StaticSprite):
 
     def __init__(self):
         super().__init__(**{

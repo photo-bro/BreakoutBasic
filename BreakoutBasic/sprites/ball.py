@@ -2,7 +2,7 @@ import sprites
 from game_globals import WINDOW_SIZE
 
 
-class Ball(sprites.AbstractSprite):
+class Ball(sprites.DynamicSprite):
     _speed = 5
     _dir_x = 1
     _dir_y = 1

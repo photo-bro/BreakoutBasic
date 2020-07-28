@@ -6,10 +6,6 @@ from pygame.image import load
 
 
 class AbstractSprite:
-    """
-
-    """
-
     def __init__(self, name, size, image_asset):
         self.name = name
         self.size = size
@@ -17,21 +13,12 @@ class AbstractSprite:
         self.position = (0, 0)
 
     def handle_event(self, event):
-        if event.type in (KEYDOWN, KEYUP):
-            self.handle_keyboard_event(event)
-        elif event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION, MOUSEWHEEL):
-            self.handle_mouse_event(event)
-
-    def handle_keyboard_event(self, event):
-        raise NotImplementedError()
-
-    def handle_mouse_event(self, event):
-        raise NotImplementedError()
-
-    def handle_collision(self, other):
         pass
 
     def tick(self):
+        pass
+
+    def handle_collision(self, other):
         pass
 
     def contains(self, other):
@@ -50,3 +37,25 @@ class AbstractSprite:
             return True
 
         return False
+
+
+class StaticSprite(AbstractSprite):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class DynamicSprite(AbstractSprite):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def handle_event(self, event):
+        if event.type in (KEYDOWN, KEYUP):
+            self.handle_keyboard_event(event)
+        elif event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION, MOUSEWHEEL):
+            self.handle_mouse_event(event)
+
+    def handle_keyboard_event(self, event):
+        raise NotImplementedError()
+
+    def handle_mouse_event(self, event):
+        raise NotImplementedError()
