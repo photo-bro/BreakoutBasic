@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from game_globals import WINDOW_SIZE
-from sprites import Paddle
+from sprites import Paddle, Ball
 
 
 def main():
@@ -25,8 +25,12 @@ def main():
     background.blit(test_title, (0, 200))
 
     paddle = Paddle()
-    paddle.position = (WIN_WIDTH / 2, WIN_HEIGHT - 100)
-    sprites = [paddle]
+    paddle.position = (WIN_WIDTH / 2, WIN_HEIGHT - 30)
+
+    ball = Ball()
+    ball.position = (WIN_WIDTH / 2, WIN_HEIGHT / 2)
+
+    sprites = [paddle, ball]
 
     while True:
 
@@ -48,7 +52,7 @@ def main():
         # Paint
         screen.blit(background, (0, 0))
         for s in sprites:
-            print(f'Sprite: {s.name} is at {s.position}')
+            # print(f'Sprite: {s.name} is at {s.position}')
             screen.blit(s.image, s.position)
 
         # pygame.event

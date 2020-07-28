@@ -2,4 +2,4 @@
 Game globals
 """
 
-WINDOW_SIZE = (1024, 768)
+WINDOW_SIZE = (640, 480)
