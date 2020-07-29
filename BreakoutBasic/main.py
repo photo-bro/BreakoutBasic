@@ -68,7 +68,7 @@ def main():
                 if o in collided_sprites:
                     continue
                 if s.contains(o):
-                    print(f'Collision! Between: {s} {s.position} and {o} {o.position}.')
+                    # print(f'Collision! Between: [{s.name}] {s.position} and [{o.name}] {o.position}.')
                     s.handle_collision(o)
                     o.handle_collision(s)
                     collided_sprites.extend([s, o])

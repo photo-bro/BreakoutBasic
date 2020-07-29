@@ -6,6 +6,7 @@ from pygame.image import load
 
 
 class AbstractSprite:
+
     def __init__(self, name, size, image_asset):
         self.name = name
         self.size = size
@@ -40,13 +41,26 @@ class AbstractSprite:
 
 
 class StaticSprite(AbstractSprite):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class DynamicSprite(AbstractSprite):
-    def __init__(self, *args, **kwargs):
+    speed = 0
+    direction = (0, 0)
+
+    def __init__(self, initial_speed=None, initial_direction=None, * args, **kwargs):
+        if initial_speed:
+            self.speed = initial_speed
+        if initial_direction:
+            self.direction = initial_direction
         super().__init__(*args, **kwargs)
+
+    @property
+    def velocity(self):
+        dir_x, dir_y = self.direction
+        return (self.speed * dir_x, self.speed * dir_y)
 
     def handle_event(self, event):
         if event.type in (KEYDOWN, KEYUP):
