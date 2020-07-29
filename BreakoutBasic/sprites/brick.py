@@ -16,5 +16,8 @@ class Brick(StaticSprite):
     def handle_mouse_event(self, event):
         pass
 
+    def handle_collision(self, other):
+        pass
+
     def tick(self):
         pass

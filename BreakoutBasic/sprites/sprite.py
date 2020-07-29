@@ -6,12 +6,14 @@ from pygame.image import load
 
 
 class AbstractSprite:
+    active = True
 
-    def __init__(self, name, size, image_asset):
+    def __init__(self, name, size, image_asset, destroy_func=None):
         self.name = name
         self.size = size
         self.image = load(os.path.join('assets/sprites', image_asset))
         self.position = (0, 0)
+        self.destroy_func = destroy_func
 
     def handle_event(self, event):
         pass
@@ -21,6 +23,10 @@ class AbstractSprite:
 
     def handle_collision(self, other):
         pass
+
+    def destroy(self):
+        if self.destroy_func:
+            self.destroy_func(self)
 
     def contains(self, other):
         assert issubclass(type(other), AbstractSprite)

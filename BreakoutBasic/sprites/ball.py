@@ -21,14 +21,24 @@ class Ball(sprites.DynamicSprite):
 
     def handle_collision(self, other):
         if isinstance(other, sprites.Brick):
-            # print(f'Collision with a brick at: ({self.position})')
-            self.bounce(other.position)
-        if isinstance(other, sprites.Paddle):
-            print(f'Collision with the paddle at: ({self.position})')
-            self.bounce(other.position, other.velocity)
+            other.destroy()
 
-    def bounce(self, position, velocity=None):
-        pass
+        if isinstance(other, sprites.Paddle):
+            pass
+        self.bounce(other)
+
+    def bounce(self, other):
+        dx, dy = self.direction
+        x, y = self.position
+        ox, oy = other.position
+        sx, sy = other.size
+
+        if oy == y <= oy + sy:  # inside vertically
+            dy = -dy
+        if ox == x <= ox + sx:  # inside horizontally
+            dx = -dx
+
+        self.direction = (dx, dy)
 
     def move(self):
         window_x, window_y = WINDOW_SIZE

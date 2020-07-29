@@ -31,15 +31,16 @@ def main():
     ball = Ball()
     ball.position = (WIN_WIDTH / 2, WIN_HEIGHT / 2)
 
-    bricks = []
+    sprites = [paddle, ball]
+    def destroy_brick_func(b): return sprites.remove(b)
+
     for y in range(0, int((WIN_HEIGHT - 200) / 20)):
         for x in range(0, int((WIN_WIDTH - 20) / 40)):
             b = Brick()
             bx, by = b.size
             b.position = (x * (bx + 10) + 40, y * (by + 10) + 40)
-            bricks.append(b)
-
-    sprites = [paddle, ball, *bricks]
+            b.destroy_func = destroy_brick_func
+            sprites.append(b)
 
     while True:
 
@@ -76,6 +77,8 @@ def main():
             # Paint
         screen.blit(background, (0, 0))
         for s in sprites:
+            if not s.active:
+                continue
             # print(f'Sprite: {s.name} is at {s.position}')
             screen.blit(s.image, s.position)
 
