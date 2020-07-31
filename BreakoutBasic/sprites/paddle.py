@@ -11,6 +11,7 @@ class Paddle(DynamicSprite):
 
     def __init__(self):
         super().__init__(**{
+            'speed': 0,
             'name': 'paddle',
             'size': (50, 12),
             'image_asset': 'paddle_12x50.png'
@@ -22,7 +23,7 @@ class Paddle(DynamicSprite):
         if event.type == KEYS.KEYDOWN:
             if event.key in (KEYS.K_LEFT, KEYS.K_RIGHT):
                 self._pressed = True
-                self.direction = (-1 if event.key == KEYS.K_LEFT else 1, 0)
+                self.vector.direction = (-1 if event.key == KEYS.K_LEFT else 1)
 
         if event.type == KEYS.KEYUP:
             self._pressed = False
@@ -35,7 +36,7 @@ class Paddle(DynamicSprite):
         window_x, _ = WINDOW_SIZE
         size_x, _ = self.size
         x, y = self.position
-        vel_x, _ = self.velocity
+        vel_x = self.speed * self.vector.direction
 
         # print(f'Padde: {self.position} :: {self.direction} :: {self.velocity}')
 
