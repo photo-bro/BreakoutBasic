@@ -3,56 +3,64 @@ import random
 
 import pygame
 
-import sprites
-from game_globals import WINDOW_SIZE
-from utils import Vector2d
+from BreakoutBasic.game_globals import WINDOW_SIZE
+from BreakoutBasic.utils import Vector2d
+
+from .brick import Brick
+from .sprite import AbstractSprite, DynamicSprite
 
 
-class Ball(sprites.DynamicSprite):
+class Ball(DynamicSprite):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(**{
-            'speed': 5,
-            'vector': Vector2d(1, random.uniform(0, 2*math.pi)),
+            'vector': Vector2d(5, random.uniform(0, 2*math.pi)),
             'name': 'ball',
             'size': (5, 5),
             'image_asset': 'ball_5x5.png'
         })
 
-    def handle_keyboard_event(self, event: pygame.event):
+    def handle_keyboard_event(self, event: pygame.event) -> None:
         pass
 
-    def handle_mouse_event(self, event: pygame.event):
+    def handle_mouse_event(self, event: pygame.event) -> None:
         pass
 
-    def handle_collision(self, other: sprites.AbstractSprite):
-        if isinstance(other, sprites.Brick):
+    def handle_collision(self, other: AbstractSprite) -> None:
+        self.bounce(other)
+
+        if isinstance(other, Brick):
             other.destroy()
 
-        if isinstance(other, sprites.Paddle):
-            pass
-        # self.bounce(other)
+        # if isinstance(other, sprites.Paddle):
+        #     pass
 
-    def bounce(self, other: sprites.AbstractSprite):
-        dx, dy = self.direction
+    def bounce(self, other: AbstractSprite) -> None:
+        # Assumes there is a collision already
+        # print(f'pos {self.position} other.pos: {other.position}. other size: {other.size}')
         x, y = self.position
+        sx, sy = self.size
         ox, oy = other.position
-        sx, sy = other.size
+        osx, osy = other.size
 
-        if oy == y <= oy + sy:  # inside vertically
-            dy = -dy
-        if ox == x <= ox + sx:  # inside horizontally
-            dx = -dx
+        if y >= oy and y + sy <= oy + osy:  # inside vertically
+            print('inside vert')
+            self.vector.mirror_x()
+        if x >= ox and x + sx <= ox + osx:  # inside horizontally
+            # if ox <= x <= ox +osx:
+            print('inside horz')
+            self.vector.mirror_y()
 
-        self.direction = (dx, dy)
+        # Add a little randomness
+        self.vector.direction += random.uniform(-0.1, 0.1)
 
-    def move(self):
+    def move(self) -> None:
         # print(str(self))
         window_x, window_y = WINDOW_SIZE
         size_x, size_y = self.size
         x, y = self.position
 
-        sx, sy = (self.speed * self.vector.x, self.speed * self.vector.y)
+        sx, sy = self.vector.x, self.vector.y
 
         if x + size_x + sx > window_x:  # right wall
             x = window_x - size_x
@@ -67,10 +75,10 @@ class Ball(sprites.DynamicSprite):
             self.vector.mirror_x()
 
         if y + sy < 0:  # top wall
-            y = 0
+            # y = 0
             self.vector.mirror_y()
 
         self.position = (x + sx, y+sy)
 
-    def tick(self):
+    def tick(self) -> None:
         self.move()

@@ -1,7 +1,9 @@
 import pygame.constants as KEYS
 
-from game_globals import WINDOW_SIZE
-from sprites import DynamicSprite
+from BreakoutBasic.game_globals import WINDOW_SIZE
+from BreakoutBasic.utils import Vector2d
+
+from .sprite import DynamicSprite
 
 
 class Paddle(DynamicSprite):
@@ -11,7 +13,7 @@ class Paddle(DynamicSprite):
 
     def __init__(self):
         super().__init__(**{
-            'speed': 0,
+            'vector': Vector2d(0, 3.14),
             'name': 'paddle',
             'size': (50, 12),
             'image_asset': 'paddle_12x50.png'
@@ -23,7 +25,13 @@ class Paddle(DynamicSprite):
         if event.type == KEYS.KEYDOWN:
             if event.key in (KEYS.K_LEFT, KEYS.K_RIGHT):
                 self._pressed = True
-                self.vector.direction = (-1 if event.key == KEYS.K_LEFT else 1)
+                if event.key == KEYS.K_LEFT:
+                    self.vector.direction = 3.14
+                else:
+                    self.vector.direction = 0
+
+                # self.vector.mirror_x()
+                # self.vector.direction = (-1 if event.key == KEYS.K_LEFT else 1)
 
         if event.type == KEYS.KEYUP:
             self._pressed = False
@@ -36,7 +44,7 @@ class Paddle(DynamicSprite):
         window_x, _ = WINDOW_SIZE
         size_x, _ = self.size
         x, y = self.position
-        vel_x = self.speed * self.vector.direction
+        vel_x = self.vector.x
 
         # print(f'Padde: {self.position} :: {self.direction} :: {self.velocity}')
 
@@ -50,11 +58,11 @@ class Paddle(DynamicSprite):
 
     def tick(self):
         if self._pressed:
-            self.speed = self._max_speed
+            self.vector.magnitude = self._max_speed
         else:
-            if self.speed > 0:
-                self.speed -= self._friction
+            if self.vector.magnitude > 0:
+                self.vector.magnitude -= self._friction
             else:
-                self.speed = 0
-        if self.speed != 0:
+                self.vector.magnitude = 0
+        if self.vector.magnitude != 0:
             self.move()

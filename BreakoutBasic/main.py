@@ -2,14 +2,14 @@ import sys
 
 import pygame
 
-from sprites import Ball, Brick, Paddle, AbstractSprite
+from BreakoutBasic.sprites import Ball, Brick, Paddle, AbstractSprite
 
-from game_globals import WINDOW_SIZE
+from BreakoutBasic.game_globals import WINDOW_SIZE
 
 debug = True
 
 
-def main():
+def main() -> None:
     pygame.init()
 
     WIN_WIDTH, WIN_HEIGHT = WINDOW_SIZE
@@ -23,30 +23,28 @@ def main():
     background = background.convert()
     background.fill(black)
 
-    font =pygame.sysfont.SysFont("monospace", 18)
+    font = pygame.sysfont.SysFont("monospace", 18)
     # test_title = font.render('Breakbasic !!', 1, (255, 255, 255))
     # background.blit(test_title, (0, 200))
 
     paddle = Paddle()
-    paddle.position = (WIN_WIDTH / 2, WIN_HEIGHT - 30)
+    paddle.position = (int(WIN_WIDTH / 2), WIN_HEIGHT - 30)
 
     ball = Ball()
-    ball.position = (WIN_WIDTH / 2, WIN_HEIGHT - 100)
+    ball.position = (int(WIN_WIDTH / 2), WIN_HEIGHT - 100)
 
     sprites = [paddle, ball]
     # def destroy_brick_func(b: AbstractSprite): return sprites.remove(b)
 
-    # for y in range(0, int((WIN_HEIGHT - 200) / 20)):
-    #     for x in range(0, int((WIN_WIDTH - 20) / 40)):
-    #         b = Brick()
-    #         bx, by = b.size
-    #         b.position = (x * (bx + 10) + 40, y * (by + 10) + 40)
-    #         b.destroy_func = destroy_brick_func
-    #         sprites.append(b)
+    for y in range(0, int((WIN_HEIGHT - 200) / 20)):
+        for x in range(0, int((WIN_WIDTH - 20) / 40)):
+            b = Brick()
+            bx, by = b.size
+            b.position = (x * (bx + 10) + 40, y * (by + 10) + 40)
+            # b.destroy_func = destroy_brick_func
+            sprites.append(b)
     pause = False
     while True:
-        if pause:
-            continue
 
         # Events
         for e in pygame.event.get():
@@ -56,13 +54,15 @@ def main():
             if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
                 pause = not pause
 
+            if pause:
+                break
+
             # Handle events
             for s in sprites:
                 s.handle_event(e)
 
-        # Adjust positions
-        for s in sprites:
-            s.tick()
+        if pause:
+            continue
 
         # Handle collisions
         collided_sprites = []
@@ -75,10 +75,14 @@ def main():
                 if o in collided_sprites:
                     continue
                 if s.contains(o):
-                    # print(f'Collision! Between: [{s.name}] {s.position} and [{o.name}] {o.position}.')
+                    print(f'Collision! Between: {s} and {o}')
                     s.handle_collision(o)
                     o.handle_collision(s)
                     collided_sprites.extend([s, o])
+
+        # Adjust positions
+        for s in sprites:
+            s.tick()
 
         # Paint
         if debug:
