@@ -1,6 +1,7 @@
 import pygame
 
 from .sprite import StaticSprite
+from BreakoutBasic.utils import Rect
 
 
 class Brick(StaticSprite):
@@ -8,7 +9,7 @@ class Brick(StaticSprite):
     def __init__(self) -> None:
         super().__init__(**{
             'name': 'brick',
-            'size': (25, 10),
+            'rect': Rect(0, 0, 25, 10),
             'image_asset': 'block_10x25.png'
         })
 

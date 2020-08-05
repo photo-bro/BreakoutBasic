@@ -1,7 +1,7 @@
 import pygame.constants as KEYS
 
 from BreakoutBasic.game_globals import WINDOW_SIZE
-from BreakoutBasic.utils import Vector2d
+from BreakoutBasic.utils import Rect, Vector2d
 
 from .sprite import DynamicSprite
 
@@ -12,12 +12,13 @@ class Paddle(DynamicSprite):
     _pressed = False
 
     def __init__(self):
-        super().__init__(**{
-            'vector': Vector2d(0, 3.14),
-            'name': 'paddle',
-            'size': (50, 12),
-            'image_asset': 'paddle_12x50.png'
-        })
+        super().__init__(
+            Vector2d(0, 3.14),
+            **{
+                'name': 'paddle',
+                'rect': Rect(0, 0, 50, 12),
+                'image_asset': 'paddle_12x50.png'
+            })
 
     def handle_keyboard_event(self, event):
         # print(f'Keyboard event: {event.type}')
@@ -42,19 +43,20 @@ class Paddle(DynamicSprite):
 
     def move(self):
         window_x, _ = WINDOW_SIZE
-        size_x, _ = self.size
-        x, y = self.position
-        vel_x = self.vector.x
+        w = self.rect.w
+        x, y = self.rect.x, self.rect.y
+        mx = self.vector.x
 
         # print(f'Padde: {self.position} :: {self.direction} :: {self.velocity}')
 
-        if x + size_x + vel_x > window_x:
-            x = window_x - size_x
-        elif x + vel_x < 0:
+        if x + w + mx > window_x:
+            x = window_x - w
+        elif x + mx < 0:
             x = 0
         else:
-            x += vel_x
-        self.position = (x, y)
+            x += mx
+        self.rect.x = x
+        self.rect.y = y
 
     def tick(self):
         if self._pressed:

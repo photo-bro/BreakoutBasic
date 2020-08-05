@@ -4,7 +4,7 @@ import random
 import pygame
 
 from BreakoutBasic.game_globals import WINDOW_SIZE
-from BreakoutBasic.utils import Vector2d
+from BreakoutBasic.utils import Vector2d, Rect
 
 from .brick import Brick
 from .sprite import AbstractSprite, DynamicSprite
@@ -13,12 +13,13 @@ from .sprite import AbstractSprite, DynamicSprite
 class Ball(DynamicSprite):
 
     def __init__(self) -> None:
-        super().__init__(**{
-            'vector': Vector2d(5, random.uniform(0, 2*math.pi)),
-            'name': 'ball',
-            'size': (5, 5),
-            'image_asset': 'ball_5x5.png'
-        })
+        super().__init__(
+            Vector2d(2, random.uniform(0, 2*math.pi)),
+            **{
+                'name': 'ball',
+                'rect': Rect(0, 0, 5, 5),
+                'image_asset': 'ball_5x5.png'
+            })
 
     def handle_keyboard_event(self, event: pygame.event) -> None:
         pass
@@ -38,16 +39,15 @@ class Ball(DynamicSprite):
     def bounce(self, other: AbstractSprite) -> None:
         # Assumes there is a collision already
         # print(f'pos {self.position} other.pos: {other.position}. other size: {other.size}')
-        x, y = self.position
-        sx, sy = self.size
-        ox, oy = other.position
-        osx, osy = other.size
+        x, y = self.rect.x, self.rect.y
+        w, h = self.rect.w, self.rect.h
+        ox, oy = other.rect.x, other.rect.y
+        ow, oh = other.rect.w, other.rect.h
 
-        if y >= oy and y + sy <= oy + osy:  # inside vertically
+        if y >= oy and y + h <= oy + oh:  # inside vertically
             print('inside vert')
             self.vector.mirror_x()
-        if x >= ox and x + sx <= ox + osx:  # inside horizontally
-            # if ox <= x <= ox +osx:
+        if x >= ox and x + w <= ox + ow:  # inside horizontally
             print('inside horz')
             self.vector.mirror_y()
 
@@ -57,28 +57,29 @@ class Ball(DynamicSprite):
     def move(self) -> None:
         # print(str(self))
         window_x, window_y = WINDOW_SIZE
-        size_x, size_y = self.size
-        x, y = self.position
+        w, h = self.rect.w, self.rect.h
+        x, y = self.rect.x, self.rect.y
 
-        sx, sy = self.vector.x, self.vector.y
+        mx, my = self.vector.x, self.vector.y
 
-        if x + size_x + sx > window_x:  # right wall
-            x = window_x - size_x
+        if x + w + mx > window_x:  # right wall
+            x = window_x - w
             self.vector.mirror_x()
 
-        if y + size_y + sy > window_y:  # bottom wall
-            y = window_y - size_y
+        if y + h + my > window_y:  # bottom wall
+            y = window_y - h
             self.vector.mirror_y()
 
-        if x + sx < 0:  # left wall
-            # x = 0
+        if x + mx < 0:  # left wall
+            x += int(-mx)
             self.vector.mirror_x()
 
-        if y + sy < 0:  # top wall
-            # y = 0
+        if y + my < 0:  # top wall
+            y += int(-my)
             self.vector.mirror_y()
 
-        self.position = (x + sx, y+sy)
+        self.rect.x = int(x + mx)
+        self.rect.y = int(y + my)
 
     def tick(self) -> None:
         self.move()
