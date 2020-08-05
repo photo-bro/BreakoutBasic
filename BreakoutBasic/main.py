@@ -9,6 +9,10 @@ from BreakoutBasic.game_globals import WINDOW_SIZE
 debug = True
 
 
+def start_game() -> None:
+    main()
+
+
 def main() -> None:
     pygame.init()
 
