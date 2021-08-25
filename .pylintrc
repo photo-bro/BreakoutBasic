@@ -1,0 +1,12 @@
+[pylint]
+
+disable=
+    missing-function-docstring,
+    missing-class-docstring,
+    missing-module-docstring,
+    invalid-name,
+    no-name-in-module,
+    c-extension-no-member,
+    no-member,
+    fixme,
+    duplicate-code

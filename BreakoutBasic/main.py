@@ -2,10 +2,11 @@ import sys
 from typing import List
 
 import pygame
+from pygame.surface import Surface
 
 from BreakoutBasic.game_globals import WINDOW_SIZE
 from BreakoutBasic.sprites import AbstractSprite, Ball, Brick, Paddle
-from BreakoutBasic.utils.colors import BLACK, RED, WHITE
+from BreakoutBasic.utils.colors import BLACK, WHITE
 
 debug = True
 
@@ -14,16 +15,16 @@ def start_game() -> None:
     main()
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=too-many-locals
     pygame.init()
+    clock = pygame.time.Clock()
 
     WIN_WIDTH, WIN_HEIGHT = WINDOW_SIZE
 
     screen = pygame.display.set_mode(WINDOW_SIZE)
-    pygame.display.set_caption('Breakout Basic - Josh Harmon')
+    pygame.display.set_caption("Breakout Basic - Josh Harmon")
 
-    background = pygame.Surface(screen.get_size())
-    background = background.convert()
+    background = pygame.Surface(screen.get_size()).convert()
     background.fill(BLACK)
 
     font = pygame.sysfont.SysFont("monospace", 18)
@@ -39,7 +40,9 @@ def main() -> None:
     ball.rect.y = WIN_HEIGHT - 100
 
     sprites: List[AbstractSprite] = [paddle, ball]
-    def destroy_brick_func(b: AbstractSprite): return sprites.remove(b)
+
+    def destroy_brick_func(b: AbstractSprite):
+        return sprites.remove(b)
 
     for y in range(0, int((WIN_HEIGHT - 200) / 20)):
         for x in range(0, int((WIN_WIDTH - 20) / 40)):
@@ -52,8 +55,9 @@ def main() -> None:
     while True:
         # Events
         for e in pygame.event.get():
-            if e.type == pygame.QUIT or \
-                    (e.type == pygame.KEYDOWN and e.key == pygame.K_q):
+            if e.type == pygame.QUIT or (
+                e.type == pygame.KEYDOWN and e.key == pygame.K_q
+            ):
                 sys.exit()
             if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
                 pause = not pause
@@ -87,6 +91,8 @@ def main() -> None:
         # pygame.event
         pygame.display.flip()
 
+        clock.tick(60)  # limit to 60fps
+
 
 def calculate_colliding_sprites(sprites: List[AbstractSprite]) -> None:
     collided_sprites = []
@@ -105,7 +111,9 @@ def calculate_colliding_sprites(sprites: List[AbstractSprite]) -> None:
                 collided_sprites.extend([s, o])
 
 
-def render_sprites(screen: pygame.Surface, background: pygame.Surface, sprites: List[AbstractSprite]) -> None:
+def render_sprites(
+    screen: Surface, background: Surface, sprites: List[AbstractSprite]
+) -> None:
     screen.blit(background, (0, 0))
     for s in sprites:
         if not s.active:

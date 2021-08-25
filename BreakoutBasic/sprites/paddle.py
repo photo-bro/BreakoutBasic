@@ -13,12 +13,13 @@ class Paddle(DynamicSprite):
 
     def __init__(self):
         super().__init__(
-            Vector2d(0, 3.14),
+            vector=Vector2d(0, 3.14),
             **{
-                'name': 'paddle',
-                'rect': Rect(0, 0, 50, 12),
-                'image_asset': 'paddle_12x50.png'
-            })
+                "name": "paddle",
+                "rect": Rect(0, 0, 50, 12),
+                "image_asset": "paddle_12x50.png",
+            }
+        )
 
     def handle_keyboard_event(self, event):
         # print(f'Keyboard event: {event.type}')

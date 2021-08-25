@@ -1,32 +1,43 @@
 from __future__ import annotations
 
-import math
 import os
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 
-import pygame
-from pygame.constants import (KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP,
-                              MOUSEMOTION, MOUSEWHEEL)
+from pygame.constants import (
+    KEYDOWN,
+    KEYUP,
+    MOUSEBUTTONDOWN,
+    MOUSEBUTTONUP,
+    MOUSEMOTION,
+    MOUSEWHEEL,
+)
+from pygame.event import Event
 from pygame.image import load
+from pygame.surface import Surface
 
-from BreakoutBasic.utils import Vector2d, Rect
+from ..utils import Rect, Vector2d
 
 
 class AbstractSprite:
     active: bool = True
     name: str
     rect: Rect
-    image: pygame.image
+    image: Surface
     destroy_func: Optional[Callable[[AbstractSprite], None]]
 
-    def __init__(self, name: str, rect: Rect, image_asset: str,
-                 destroy_func: Optional[Callable[[AbstractSprite], None]] = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        rect: Rect,
+        image_asset: str,
+        destroy_func: Optional[Callable[[AbstractSprite], None]] = None,
+    ) -> None:
         self.name = name
         self.rect = rect
-        self.image = load(os.path.join('assets/sprites', image_asset))
+        self.image = load(os.path.join("assets/sprites", image_asset))
         self.destroy_func = destroy_func
 
-    def handle_event(self, event: pygame.event) -> None:
+    def handle_event(self, event: Event) -> None:
         pass
 
     def tick(self) -> None:
@@ -42,23 +53,21 @@ class AbstractSprite:
     def contains(self, other: AbstractSprite) -> bool:
         return self.rect.contains(other.rect)
 
-    def render(self, surface: pygame.Surface) -> None:
+    def render(self, surface: Surface) -> None:
         # TODO
         pass
 
     def __str__(self) -> str:
-        return f'{self.name} at ({self.rect.x}, {self.rect.y}).'
+        return f"{self.name} at ({self.rect.x}, {self.rect.y})."
 
 
 class StaticSprite(AbstractSprite):
-
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
 
 class DynamicSprite(AbstractSprite):
-
-    def __init__(self, vector: Vector2d = None, *args, **kwargs) -> None:
+    def __init__(self, *args, vector: Vector2d = None, **kwargs) -> None:
         if vector:
             self.vector = vector
         else:
@@ -66,18 +75,18 @@ class DynamicSprite(AbstractSprite):
 
         super().__init__(*args, **kwargs)
 
-    def handle_event(self, event: pygame.event) -> None:
+    def handle_event(self, event: Event) -> None:
         if event.type in (KEYDOWN, KEYUP):
             self.handle_keyboard_event(event)
         elif event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION, MOUSEWHEEL):
             self.handle_mouse_event(event)
 
-    def handle_keyboard_event(self, event: pygame.event) -> None:
+    def handle_keyboard_event(self, event: Event) -> None:
         raise NotImplementedError()
 
-    def handle_mouse_event(self, event: pygame.event) -> None:
+    def handle_mouse_event(self, event: Event) -> None:
         raise NotImplementedError()
 
     def __str__(self) -> str:
         s = super().__str__()
-        return f'{s} Vector :: {self.vector}.'
+        return f"{s} Vector :: {self.vector}."
