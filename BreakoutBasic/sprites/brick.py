@@ -1,6 +1,6 @@
 from pygame.event import Event
 
-from BreakoutBasic.utils import Rect
+from ..utils import Rect
 
 from .sprite import AbstractSprite, StaticSprite
 

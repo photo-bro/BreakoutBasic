@@ -3,9 +3,8 @@ import random
 
 from pygame.event import Event
 
-from BreakoutBasic.game_globals import WINDOW_SIZE
-from BreakoutBasic.utils import Rect, Vector2d
-
+from ..game_globals import WINDOW_SIZE
+from ..utils import Rect, Vector2d
 from .brick import Brick
 from .sprite import AbstractSprite, DynamicSprite
 

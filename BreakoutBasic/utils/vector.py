@@ -24,7 +24,7 @@ class Vector2d:
         return Vector2d(new_mag, new_dir)
 
     def normalize_direction(self) -> None:
-        if 0 > self.direction > 2 * math.pi:
+        if self.direction < 0 or self.direction > 2 * math.pi:
             self.direction %= math.pi
 
     def mirror_x(self) -> None:

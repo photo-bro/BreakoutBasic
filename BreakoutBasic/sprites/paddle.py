@@ -1,8 +1,7 @@
 import pygame.constants as KEYS
 
-from BreakoutBasic.game_globals import WINDOW_SIZE
-from BreakoutBasic.utils import Rect, Vector2d
-
+from ..game_globals import WINDOW_SIZE
+from ..utils import Rect, Vector2d
 from .sprite import DynamicSprite
 
 

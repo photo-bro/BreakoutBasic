@@ -1,12 +1,12 @@
 import sys
-from typing import List
+from typing import List, Set
 
 import pygame
 from pygame.surface import Surface
 
-from BreakoutBasic.game_globals import WINDOW_SIZE
-from BreakoutBasic.sprites import AbstractSprite, Ball, Brick, Paddle
-from BreakoutBasic.utils.colors import BLACK, WHITE
+from .game_globals import WINDOW_SIZE
+from .sprites import AbstractSprite, Ball, Brick, Paddle
+from .utils.colors import BLACK, WHITE
 
 debug = True
 
@@ -73,7 +73,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             continue
 
         # Handle collisions
-        calculate_colliding_sprites(sprites)
+        calculate_colliding_sprites(set(sprites))
 
         # Adjust positions
         for s in sprites:
@@ -94,21 +94,19 @@ def main() -> None:  # pylint: disable=too-many-locals
         clock.tick(60)  # limit to 60fps
 
 
-def calculate_colliding_sprites(sprites: List[AbstractSprite]) -> None:
-    collided_sprites = []
+def calculate_colliding_sprites(sprites: Set[AbstractSprite]) -> None:
+    collided_sprites: Set[AbstractSprite] = set()
+    checked_sprites: Set[AbstractSprite] = set()
     for s in sprites:
-        if s in collided_sprites:
+        if s in checked_sprites.union(collided_sprites):
             continue
-        for o in sprites:
-            if s == o:
-                continue
-            if o in collided_sprites:
-                continue
+        checked_sprites.add(s)
+        for o in sprites.difference(checked_sprites.union(collided_sprites)):
             if s.contains(o):
                 # print(f'Collision! Between: {s} and {o}')
                 s.handle_collision(o)
                 o.handle_collision(s)
-                collided_sprites.extend([s, o])
+                collided_sprites.update([s, o])
 
 
 def render_sprites(
