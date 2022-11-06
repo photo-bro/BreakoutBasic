@@ -7,16 +7,22 @@ from pygame.surface import Surface
 from .game_globals import WINDOW_SIZE
 from .sprites import AbstractSprite, Ball, Brick, Paddle
 from .utils.colors import BLACK, WHITE
+from .world import World
 
 debug = True
 
 
-def start_game() -> None:
-    main()
-
-
-def main() -> None:  # pylint: disable=too-many-locals
+def start_game() -> None:  # pylint: disable=too-many-locals
     pygame.init()
+
+    world: World = create_world()
+    while not do_event_loop(world):
+        world = create_world()
+        do_event_loop(world)
+    sys.exit()
+
+
+def create_world() -> World:
     clock = pygame.time.Clock()
 
     WIN_WIDTH, WIN_HEIGHT = WINDOW_SIZE
@@ -27,7 +33,7 @@ def main() -> None:  # pylint: disable=too-many-locals
     background = pygame.Surface(screen.get_size()).convert()
     background.fill(BLACK)
 
-    font = pygame.sysfont.SysFont("monospace", 18)
+    font = pygame.sysfont.SysFont("monospace", 8)
     # test_title = font.render('Breakbasic !!', 1, (255, 255, 255))
     # background.blit(test_title, (0, 200))
 
@@ -44,23 +50,42 @@ def main() -> None:  # pylint: disable=too-many-locals
     def destroy_brick_func(b: AbstractSprite):
         return sprites.remove(b)
 
-    for y in range(0, int((WIN_HEIGHT - 200) / 20)):
-        for x in range(0, int((WIN_WIDTH - 20) / 40)):
-            b = Brick()
-            b.rect.x = x * (b.rect.w + 10) + 40
-            b.rect.y = y * (b.rect.h + 10) + 40
-            b.destroy_func = destroy_brick_func
-            sprites.append(b)
+    # for y in range(0, int((WIN_HEIGHT - 200) / 20)):
+    #     for x in range(0, int((WIN_WIDTH - 20) / 40)):
+    #         b = Brick()
+    #         b.rect.x = x * (b.rect.w + 10) + 40
+    #         b.rect.y = y * (b.rect.h + 10) + 40
+    #         b.destroy_func = destroy_brick_func
+    #         sprites.append(b)
+
+    return World(clock, screen, background, ball, paddle, sprites, font, debug)
+
+
+def do_event_loop(world: World) -> bool:
+    (
+        clock,
+        screen,
+        background,
+        ball,
+        paddle,
+        sprites,
+        font,
+        game_debug,
+    ) = world.as_tuple()
     pause = False
     while True:
         # Events
         for e in pygame.event.get():
-            if e.type == pygame.QUIT or (
-                e.type == pygame.KEYDOWN and e.key == pygame.K_q
-            ):
-                sys.exit()
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
-                pause = not pause
+            if e.type == pygame.QUIT:
+                return True
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_q:
+                    return True
+                if e.key == pygame.K_p:
+                    pause = not pause
+                if e.key == pygame.K_r:
+                    print("RESET!!!")
+                    return False
 
             if pause:
                 break
@@ -80,7 +105,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             s.tick()
 
         # Render
-        if debug:
+        if game_debug:
             background.fill(BLACK)
             ball_text = font.render(str(ball), 1, WHITE)
             background.blit(ball_text, (0, 0))
@@ -95,18 +120,17 @@ def main() -> None:  # pylint: disable=too-many-locals
 
 
 def calculate_colliding_sprites(sprites: Set[AbstractSprite]) -> None:
-    collided_sprites: Set[AbstractSprite] = set()
-    checked_sprites: Set[AbstractSprite] = set()
+    calculated_sprites: Set[AbstractSprite] = set()
     for s in sprites:
-        if s in checked_sprites.union(collided_sprites):
+        if s in calculated_sprites:
             continue
-        checked_sprites.add(s)
-        for o in sprites.difference(checked_sprites.union(collided_sprites)):
+        calculated_sprites.add(s)
+        for o in sprites.difference(calculated_sprites):
             if s.contains(o):
                 # print(f'Collision! Between: {s} and {o}')
                 s.handle_collision(o)
                 o.handle_collision(s)
-                collided_sprites.update([s, o])
+                calculated_sprites.add(o)
 
 
 def render_sprites(
