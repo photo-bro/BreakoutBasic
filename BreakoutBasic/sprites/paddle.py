@@ -1,11 +1,13 @@
+from typing import List
+
 import pygame.constants as KEYS
 
 from ..game_globals import WINDOW_SIZE
 from ..utils import Rect, Vector2d
-from .sprite import DynamicSprite
+from .sprite import AbstractSprite, DynamicVectorSprite
 
 
-class Paddle(DynamicSprite):
+class Paddle(DynamicVectorSprite):
     _max_speed = 10
     _friction = 0.5
     _pressed = False
@@ -58,7 +60,7 @@ class Paddle(DynamicSprite):
         self.rect.x = x
         self.rect.y = y
 
-    def tick(self):
+    def tick(self, colliding_sprites: List[AbstractSprite]):
         if self._pressed:
             self.vector.magnitude = self._max_speed
         else:

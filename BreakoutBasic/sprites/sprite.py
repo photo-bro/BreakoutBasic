@@ -1,21 +1,15 @@
 from __future__ import annotations
 
 import os
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
-from pygame.constants import (
-    KEYDOWN,
-    KEYUP,
-    MOUSEBUTTONDOWN,
-    MOUSEBUTTONUP,
-    MOUSEMOTION,
-    MOUSEWHEEL,
-)
+from pygame.constants import (KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP,
+                              MOUSEMOTION, MOUSEWHEEL)
 from pygame.event import Event
 from pygame.image import load
 from pygame.surface import Surface
 
-from ..utils import Rect, Vector2d
+from ..utils import FloatPoint, Rect, Vector2d
 
 
 class AbstractSprite:
@@ -40,10 +34,7 @@ class AbstractSprite:
     def handle_event(self, event: Event) -> None:
         pass
 
-    def tick(self) -> None:
-        pass
-
-    def handle_collision(self, other: AbstractSprite) -> None:
+    def tick(self, colliding_sprites: List[AbstractSprite]) -> None:
         pass
 
     def destroy(self) -> None:
@@ -51,14 +42,14 @@ class AbstractSprite:
             self.destroy_func(self)
 
     def contains(self, other: AbstractSprite) -> bool:
-        return self.rect.contains(other.rect)
+        return self.rect.intersects(other.rect)
 
     def render(self, surface: Surface) -> None:
         # TODO
         pass
 
     def __str__(self) -> str:
-        return f"{self.name} at ({self.rect.x}, {self.rect.y})."
+        return f"{self.name} at ({self.rect.x:.2f}, {self.rect.y:.2f})."
 
 
 class StaticSprite(AbstractSprite):
@@ -67,6 +58,20 @@ class StaticSprite(AbstractSprite):
 
 
 class DynamicSprite(AbstractSprite):
+    velocity: FloatPoint = FloatPoint(0.0, 0.0)
+
+    def __init__(
+        self,
+        *args,
+        velocity: Optional[FloatPoint] = None,
+        **kwargs,
+    ) -> None:
+        if velocity:
+            self.velocity = velocity
+        super().__init__(*args, **kwargs)
+
+
+class DynamicVectorSprite(AbstractSprite):
     def __init__(self, *args, vector: Vector2d = None, **kwargs) -> None:
         if vector:
             self.vector = vector

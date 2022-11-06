@@ -1,19 +1,24 @@
 import math
-import random
+from typing import List
 
 from pygame.event import Event
 
 from ..game_globals import WINDOW_SIZE
-from ..utils import Rect, Vector2d
+from ..utils import Rect
 from .brick import Brick
+from .paddle import Paddle
 from .sprite import AbstractSprite, DynamicSprite
 
 
 class Ball(DynamicSprite):
     def __init__(self) -> None:
         super().__init__(
-            vector=Vector2d(2, random.uniform(0, 2 * math.pi)),
-            **{"name": "ball", "rect": Rect(0, 0, 5, 5), "image_asset": "ball_5x5.png"},
+            velocity=None,
+            **{
+                "name": "ball",
+                "rect": Rect(0, 0, 5, 5),
+                "image_asset": "ball_5x5.png",
+            },
         )
 
     def handle_keyboard_event(self, event: Event) -> None:
@@ -22,59 +27,47 @@ class Ball(DynamicSprite):
     def handle_mouse_event(self, event: Event) -> None:
         pass
 
-    def handle_collision(self, other: AbstractSprite) -> None:
-        self.bounce(other)
+    def tick(self, colliding_sprites: List[AbstractSprite]) -> None:
+        nx, ny = self.rect.position
+        nw, nh = self.rect.w, self.rect.h
+        vx, vy = self.velocity.position
 
-        if isinstance(other, Brick):
-            other.destroy()
+        nx += vx  # type: ignore
+        ny += vy  # type: ignore
 
-        # if isinstance(other, sprites.Paddle):
-        #     pass
-
-    def bounce(self, other: AbstractSprite) -> None:
-        # Assumes there is a collision already
-        print(f"Bounce! {self} and {other}")
-        x, y = self.rect.x, self.rect.y
-        w, h = self.rect.w, self.rect.h
-        ox, oy = other.rect.x, other.rect.y
-        ow, oh = other.rect.w, other.rect.h
-
-        if y >= oy and y + h <= oy + oh:  # inside vertically
-            print("inside vert")
-            self.vector.mirror_x()
-        if x >= ox and x + w <= ox + ow:  # inside horizontally
-            print("inside horz")
-            self.vector.mirror_y()
-
-        # Add a little randomness
-        self.vector.direction += random.uniform(-0.1, 0.1)
-
-    def move(self) -> None:
-        # print(str(self))
         window_x, window_y = WINDOW_SIZE
-        w, h = self.rect.w, self.rect.h
-        x, y = self.rect.x, self.rect.y
 
-        mx, my = self.vector.x, self.vector.y
+        # Wall collisions
+        # Left and right walls
+        if nx <= 0 or nx > window_x - nw:
+            nx = self.rect.x
+            vx *= -1
+        # Top and bottom wall
+        if ny <= 0 or ny > window_y - nh:
+            ny = self.rect.y
+            vy *= -1
 
-        if x + w + mx > window_x:  # right wall
-            x = window_x - w
-            self.vector.mirror_x()
+        for other in colliding_sprites:
+            if isinstance(other, Paddle):
+                if self.rect.y < ny:
+                    ny = self.rect.y
+                vy = math.fabs(vy) * -1
+                distance_to_middle_paddle = nx - (other.rect.x + other.rect.w / 2)
+                relative_impact_point = distance_to_middle_paddle / other.rect.w
+                vx = relative_impact_point * 7
 
-        if y + h + my > window_y:  # bottom wall
-            y = window_y - h
-            self.vector.mirror_y()
+            if isinstance(other, Brick):
+                overlap_rect = self.rect.intersected(other.rect)
+                if overlap_rect.w < overlap_rect.h:
+                    nx = self.rect.x
+                    vx *= -1
+                else:
+                    ny = self.rect.y
+                    vy *= -1
 
-        if x + mx < 0:  # left wall
-            x += int(-mx)
-            self.vector.mirror_x()
+                other.destroy()
 
-        if y + my < 0:  # top wall
-            y += int(-my)
-            self.vector.mirror_y()
-
-        self.rect.x = int(x + mx)
-        self.rect.y = int(y + my)
-
-    def tick(self) -> None:
-        self.move()
+        self.rect.x = nx
+        self.rect.y = ny
+        self.velocity.x = vx
+        self.velocity.y = vy

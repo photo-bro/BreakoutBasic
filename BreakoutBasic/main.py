@@ -1,11 +1,15 @@
+import math
+import random
 import sys
-from typing import List, Set
+from collections import defaultdict
+from typing import Dict, List
 
 import pygame
 from pygame.surface import Surface
 
 from .game_globals import WINDOW_SIZE
 from .sprites import AbstractSprite, Ball, Brick, Paddle
+from .utils import IntPoint
 from .utils.colors import BLACK, WHITE
 from .world import World
 
@@ -33,7 +37,7 @@ def create_world() -> World:
     background = pygame.Surface(screen.get_size()).convert()
     background.fill(BLACK)
 
-    font = pygame.sysfont.SysFont("monospace", 8)
+    font = pygame.sysfont.SysFont("monospace", 12)
     # test_title = font.render('Breakbasic !!', 1, (255, 255, 255))
     # background.blit(test_title, (0, 200))
 
@@ -44,35 +48,45 @@ def create_world() -> World:
     ball = Ball()
     ball.rect.x = int(WIN_WIDTH / 2)
     ball.rect.y = WIN_HEIGHT - 100
+    ball.velocity.x = random.uniform(-2 * math.pi, 2 * math.pi)
+    ball.velocity.y = random.uniform(-2 * math.pi, 2 * math.pi)
 
-    sprites: List[AbstractSprite] = [paddle, ball]
+    bricks: List[Brick] = []
 
     def destroy_brick_func(b: AbstractSprite):
-        return sprites.remove(b)
+        b.active = False
+        if isinstance(b, Brick) and b in bricks:
+            bricks.remove(b)
 
-    # for y in range(0, int((WIN_HEIGHT - 200) / 20)):
-    #     for x in range(0, int((WIN_WIDTH - 20) / 40)):
-    #         b = Brick()
-    #         b.rect.x = x * (b.rect.w + 10) + 40
-    #         b.rect.y = y * (b.rect.h + 10) + 40
-    #         b.destroy_func = destroy_brick_func
-    #         sprites.append(b)
+    brick_margin = 5
+    brick_offset = 20
+    for y in range(0, int((WIN_HEIGHT - 200) / (10 + brick_margin))):
+        for x in range(0, int((WIN_WIDTH) / (25 + brick_margin) - 1)):
+            b = Brick(
+                position=IntPoint(
+                    brick_offset + x * (25 + brick_margin),
+                    brick_offset + y * (10 + brick_margin),
+                )
+            )
+            b.destroy_func = destroy_brick_func
+            bricks.append(b)
+    print(f"Brick count: {len(bricks)}")
+    return World(clock, screen, background, ball, paddle, bricks, font, debug)
 
-    return World(clock, screen, background, ball, paddle, sprites, font, debug)
 
-
-def do_event_loop(world: World) -> bool:
+def do_event_loop(world: World) -> bool:  # pylint: disable=too-many-locals
     (
         clock,
         screen,
         background,
         ball,
         paddle,
-        sprites,
+        bricks,
         font,
         game_debug,
     ) = world.as_tuple()
-    pause = False
+    sprites: List[AbstractSprite] = [paddle, ball, *bricks]
+    pause: bool = False
     while True:
         # Events
         for e in pygame.event.get():
@@ -97,21 +111,23 @@ def do_event_loop(world: World) -> bool:
         if pause:
             continue
 
-        # Handle collisions
-        calculate_colliding_sprites(set(sprites))
+        # Calculate collisions
+        colliding_sprites: Dict[
+            AbstractSprite, List[AbstractSprite]
+        ] = calculate_colliding_sprites(ball, paddle, bricks)
 
-        # Adjust positions
+        # Sprite tick
         for s in sprites:
-            s.tick()
+            s.tick(colliding_sprites.get(s, []))
 
         # Render
+        render_sprites(screen, background, sprites)
         if game_debug:
             background.fill(BLACK)
             ball_text = font.render(str(ball), 1, WHITE)
             background.blit(ball_text, (0, 0))
             paddle_text = font.render(str(paddle), 1, WHITE)
             background.blit(paddle_text, (0, 20))
-        render_sprites(screen, background, sprites)
 
         # pygame.event
         pygame.display.flip()
@@ -119,18 +135,17 @@ def do_event_loop(world: World) -> bool:
         clock.tick(60)  # limit to 60fps
 
 
-def calculate_colliding_sprites(sprites: Set[AbstractSprite]) -> None:
-    calculated_sprites: Set[AbstractSprite] = set()
-    for s in sprites:
-        if s in calculated_sprites:
-            continue
-        calculated_sprites.add(s)
-        for o in sprites.difference(calculated_sprites):
-            if s.contains(o):
-                # print(f'Collision! Between: {s} and {o}')
-                s.handle_collision(o)
-                o.handle_collision(s)
-                calculated_sprites.add(o)
+def calculate_colliding_sprites(
+    ball: Ball,
+    paddle: Paddle,
+    bricks: List[AbstractSprite],
+) -> Dict[AbstractSprite, List[AbstractSprite]]:
+    collided_sprite_dict: Dict[AbstractSprite, List[AbstractSprite]] = defaultdict(list)
+    if ball.contains(paddle):
+        collided_sprite_dict[ball].append(paddle)
+        collided_sprite_dict[paddle].append(ball)
+    collided_sprite_dict[ball].extend(b for b in bricks if ball.contains(b))
+    return collided_sprite_dict
 
 
 def render_sprites(
